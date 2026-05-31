@@ -3170,6 +3170,14 @@ void YParticles3D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_rotation_over_lifetime_axis"), &YParticles3D::get_rotation_over_lifetime_axis);
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR3, "rotation_over_lifetime_axis"), "set_rotation_over_lifetime_axis", "get_rotation_over_lifetime_axis");
 
+	ClassDB::bind_method(D_METHOD("set_orbit_over_lifetime", "value"), &YParticles3D::set_orbit_over_lifetime);
+	ClassDB::bind_method(D_METHOD("get_orbit_over_lifetime"), &YParticles3D::get_orbit_over_lifetime);
+	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "orbit_over_lifetime", PROPERTY_HINT_RESOURCE_TYPE, "Curve"), "set_orbit_over_lifetime", "get_orbit_over_lifetime");
+
+	ClassDB::bind_method(D_METHOD("set_orbit_around_axis", "value"), &YParticles3D::set_orbit_around_axis);
+	ClassDB::bind_method(D_METHOD("get_orbit_around_axis"), &YParticles3D::get_orbit_around_axis);
+	ADD_PROPERTY(PropertyInfo(Variant::VECTOR3, "orbit_around_axis"), "set_orbit_around_axis", "get_orbit_around_axis");
+
 	ADD_GROUP("Rotation By Speed", "");
 	ClassDB::bind_method(D_METHOD("set_enable_rotation_by_speed", "value"), &YParticles3D::set_enable_rotation_by_speed);
 	ClassDB::bind_method(D_METHOD("get_enable_rotation_by_speed"), &YParticles3D::get_enable_rotation_by_speed);
@@ -3208,14 +3216,6 @@ void YParticles3D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_inherit_velocity_curve", "value"), &YParticles3D::set_inherit_velocity_curve);
 	ClassDB::bind_method(D_METHOD("get_inherit_velocity_curve"), &YParticles3D::get_inherit_velocity_curve);
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "inherit_velocity_curve", PROPERTY_HINT_RESOURCE_TYPE, "Curve"), "set_inherit_velocity_curve", "get_inherit_velocity_curve");
-
-	ClassDB::bind_method(D_METHOD("set_orbit_over_lifetime", "value"), &YParticles3D::set_orbit_over_lifetime);
-	ClassDB::bind_method(D_METHOD("get_orbit_over_lifetime"), &YParticles3D::get_orbit_over_lifetime);
-	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "orbit_over_lifetime", PROPERTY_HINT_RESOURCE_TYPE, "Curve"), "set_orbit_over_lifetime", "get_orbit_over_lifetime");
-
-	ClassDB::bind_method(D_METHOD("set_orbit_around_axis", "value"), &YParticles3D::set_orbit_around_axis);
-	ClassDB::bind_method(D_METHOD("get_orbit_around_axis"), &YParticles3D::get_orbit_around_axis);
-	ADD_PROPERTY(PropertyInfo(Variant::VECTOR3, "orbit_around_axis"), "set_orbit_around_axis", "get_orbit_around_axis");
 
 	ADD_GROUP("Color Over Lifetime", "");
 	ClassDB::bind_method(D_METHOD("set_enable_color_over_lifetime", "value"), &YParticles3D::set_enable_color_over_lifetime);

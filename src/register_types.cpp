@@ -18,15 +18,9 @@ using namespace godot;
 
 static bool _yparticles3d_register_shader_setting(const String &p_name, const String &p_default_path) {
 	ProjectSettings *project_settings = ProjectSettings::get_singleton();
+	const bool has_setting = project_settings->has_setting(p_name);
 	const Variant current_value = project_settings->get_setting(p_name, Variant());
-	if (current_value.get_type() == Variant::NIL || String(current_value).is_empty()) {
-		Dictionary property_info;
-		property_info["name"] = p_name;
-		property_info["type"] = Variant::STRING;
-		property_info["hint"] = PropertyHint::PROPERTY_HINT_FILE;
-		property_info["hint_string"] = "*.gdshader";
-		property_info["usage"] = PropertyUsageFlags::PROPERTY_USAGE_DEFAULT | PropertyUsageFlags::PROPERTY_USAGE_STORAGE;
-		project_settings->add_property_info(property_info);
+	if (!has_setting || current_value.get_type() == Variant::NIL || String(current_value).is_empty()) {
 		project_settings->set_setting(p_name, p_default_path);
 		project_settings->set_initial_value(p_name, p_default_path);
 		return true;
@@ -35,6 +29,12 @@ static bool _yparticles3d_register_shader_setting(const String &p_name, const St
 }
 
 static void _yparticles3d_register_shader_settings() {
+	static bool shader_settings_registered = false;
+	if (shader_settings_registered) {
+		return;
+	}
+	shader_settings_registered = true;
+
 	ProjectSettings *project_settings = ProjectSettings::get_singleton();
 	bool changed = false;
 	changed |= _yparticles3d_register_shader_setting("yengine/yparticles3d/shaders/mix", "res://addons/yparticles3d/shaders/YParticleGradientMapMix.gdshader");
