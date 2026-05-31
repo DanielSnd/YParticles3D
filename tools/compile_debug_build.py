@@ -11,10 +11,10 @@ def clear_screen():
 
 
 def run_scons_build():
-    """Run 'scons compiledb=yes' from the project root and show output in real-time."""
+    """Run a tools-enabled editor build and install it on the debug addon path."""
     try:
         process = subprocess.Popen(
-            ["scons", "compiledb=yes"],
+            ["scons", "target=editor", "compiledb=yes"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             universal_newlines=True,

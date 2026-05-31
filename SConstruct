@@ -24,7 +24,7 @@ def find_sources(dirs, exts):
     return sources
 
 # Configuration
-libname = "plugin_name"
+libname = "yparticles3d"
 projectdir = "test_project"
 
 # Set up the environment
@@ -55,7 +55,7 @@ opts.Add(EnumVariable(
 
 is_2d_profile_used = False
 is_3d_profile_used = False
-is_custom_profile_used = True
+is_custom_profile_used = False
 if is_2d_profile_used:
     env["build_profile"] = "2d_build_profile.json"
 elif is_3d_profile_used:
@@ -103,7 +103,10 @@ if env.get("target") in ["editor", "template_debug"]:
     except AttributeError:
         print("Not including class reference as we're targeting a pre-4.3 baseline.")
 
-# Determine suffixes based on env (align with godot-cpp conventions)
+# Determine suffixes based on env (align with godot-cpp conventions).
+# For local development we may build the editor target but still install it as the
+# debug library so the .gdextension debug entry can load the tools-enabled binary.
+filename_target = "template_debug" if env["target"] == "editor" else env["target"]
 arch_suffix = f".{env['arch']}" if env['arch'] and env['arch'] != 'universal' else ''
 # Normalize 'threads' to a lowercase string, defaulting to 'no'
 threads_val = str(env.get('threads', 'no')).strip().lower()
@@ -111,7 +114,7 @@ threads_val = str(env.get('threads', 'no')).strip().lower()
 # Determine if '.threads' suffix should be added
 threads_suffix = '.threads' if env['platform'] == 'web' and threads_val in ('yes', 'true') else ''
 
-suffix = f".{env['platform']}.{env['target']}{arch_suffix}{threads_suffix}.{precision}"
+suffix = f".{env['platform']}.{filename_target}{arch_suffix}{threads_suffix}.{precision}"
 lib_filename = f"{env.subst('$SHLIBPREFIX')}{libname}{suffix}{env.subst('$SHLIBSUFFIX')}"
 
 # Generate Info.plist content for macOS and iOS
@@ -258,7 +261,7 @@ else:
     install_source = library
 
 # Install the library to test_project
-install_dir = f"{projectdir}/{libname}/bin/{env['platform']}/"
+install_dir = f"{projectdir}/addons/{libname}/bin/{env['platform']}/"
 copy = env.Install(install_dir, source=install_source)
 
 # Set default targets

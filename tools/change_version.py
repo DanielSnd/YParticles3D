@@ -206,7 +206,7 @@ def update_dont_touch_file(selected_branch, all_branches):
 
 def update_gdextension_file(plugin_name, version):
     """Update compatibility_minimum in the plugin's .gdextension file."""
-    gdextension_path = os.path.join(PARENT_DIR, "test_project", plugin_name, f"{plugin_name}.gdextension")
+    gdextension_path = os.path.join(PARENT_DIR, "test_project","addons", plugin_name, f"{plugin_name}.gdextension")
     if not os.path.isfile(gdextension_path):
         print(f"Error: .gdextension file not found at {gdextension_path}")
         sys.exit(1)

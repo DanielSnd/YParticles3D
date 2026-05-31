@@ -5,8 +5,8 @@ on:
       build_type:
         description: |
           Select build type:
-          - debug: Compiles debug builds that are loaded by the Godot editor, only used for development and testing. By using this option you can check whether your plugin works correctly for all operating systems and architectures.
-          - full_plugin_compilation: Compiles debug builds as well as release builds that are the final builds. Enables developers to use your plugin both in the editor and also in their final exported game.
+          - debug: Compiles tools-enabled editor builds that are loaded by the Godot editor, only used for development and testing. By using this option you can check whether your plugin works correctly for all operating systems and architectures.
+          - full_plugin_compilation: Compiles tools-enabled editor builds as well as release builds that are the final builds. Enables developers to use your plugin both in the editor and also in their final exported game.
         required: true
         type: choice
         options:
@@ -53,7 +53,7 @@ on:
         default: false
 
 env:
-  PLUGIN_NAME: "plugin_name" # Replace with your plugin name (must match .gdextension file name)
+  PLUGIN_NAME: "yparticles3d" # Replace with your plugin name (must match .gdextension file name)
 
 jobs:
   set-matrix:
@@ -66,9 +66,9 @@ jobs:
         id: set-matrix
         run: |
           if [ "${{ github.event.inputs.build_type }}" = "full_plugin_compilation" ]; then
-            TARGET_TYPES='["template_debug", "template_release"]'
+            TARGET_TYPES='["editor", "template_release"]'
           else
-            TARGET_TYPES='["template_debug"]'
+            TARGET_TYPES='["editor"]'
           fi
           if [ "${{ github.event.inputs.precision }}" = "both" ]; then
             FLOAT_PRECISIONS='["single", "double"]'
@@ -134,7 +134,11 @@ jobs:
         id: set-build-name
         shell: bash
         run: |
-          NAME="${{ env.PLUGIN_NAME }}.${{ matrix.target.platform }}.${{ matrix.target-type }}.${{ matrix.target.arch }}.${{ matrix.float-precision }}${{ (matrix.target.platform == 'web' && matrix.target.threads == 'yes') && '.threads' || '' }}"
+          ARTIFACT_TARGET="${{ matrix.target-type }}"
+          if [ "$ARTIFACT_TARGET" = "editor" ]; then
+            ARTIFACT_TARGET="template_debug"
+          fi
+          NAME="${{ env.PLUGIN_NAME }}.${{ matrix.target.platform }}.${ARTIFACT_TARGET}.${{ matrix.target.arch }}.${{ matrix.float-precision }}${{ (matrix.target.platform == 'web' && matrix.target.threads == 'yes') && '.threads' || '' }}"
           echo "build_name=$NAME" >> $GITHUB_OUTPUT
           echo "cache_name=${NAME//./_}_${{ github.event.inputs.lto }}" >> $GITHUB_OUTPUT
 
@@ -235,10 +239,16 @@ jobs:
         with:
           path: artifacts
 
-      # Merge into the correct structure: plugin_name_goes_here/bin/<platform>/
+      - name: Prepare plugin directory
+        run: |
+          mkdir -p "${{ env.PLUGIN_NAME }}"
+          cp -R "test_project/addons/${{ env.PLUGIN_NAME }}/." "${{ env.PLUGIN_NAME }}/"
+          rm -rf "${{ env.PLUGIN_NAME }}/bin"
+          mkdir -p "${{ env.PLUGIN_NAME }}/bin"
+
+      # Merge built binaries into the packaged addon structure.
       - name: Organize artifacts
         run: |
-          mkdir -p "${{ env.PLUGIN_NAME }}/bin"
           for platform_dir in artifacts/*; do
             [ -d "$platform_dir" ] || continue
             # Copy any platform folder found inside this artifact
@@ -248,13 +258,6 @@ jobs:
               cp -R "$p/"* "${{ env.PLUGIN_NAME }}/bin/$platform_name/" || true
             done
           done
-
-      # Copy .gdextension file if it exists
-      - name: Copy .gdextension file
-        run: |
-          if [ -f "test_project/${{ env.PLUGIN_NAME }}/${{ env.PLUGIN_NAME }}.gdextension" ]; then
-            cp "test_project/${{ env.PLUGIN_NAME }}/${{ env.PLUGIN_NAME }}.gdextension" "${{ env.PLUGIN_NAME }}/${{ env.PLUGIN_NAME }}.gdextension"
-          fi
 
       # Copy LICENSE file if it exists
       - name: Copy LICENSE
